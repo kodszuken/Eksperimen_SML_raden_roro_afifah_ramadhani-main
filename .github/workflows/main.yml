@@ -1,0 +1,48 @@
+# Nama workflow yang akan muncul di tab Actions GitHub
+name: Automatic Data Preprocessing
+
+# Trigger: Workflow ini berjalan setiap kali ada 'push' ke branch 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  preprocess-data:
+    # TAMBAHKAN DUA BARIS INI
+    permissions:
+      contents: write
+    # BARIS SELANJUTNYA TETAP SAMA
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+      # ... sisa workflow tetap sama # <-- TAMBAHKAN BLOK 'with' DAN BARIS INI
+
+      # Langkah 2: Menyiapkan lingkungan Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # Sesuaikan dengan versi yang kamu gunakan
+
+      # Langkah 3: Menginstall library yang dibutuhkan
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas scikit-learn
+
+      # Langkah 4: Menjalankan skrip Python untuk preprocessing
+      - name: Run preprocessing script
+        run: python preprocessing/automate_raden_roro_afifah_ramadhani.py
+
+      # Langkah 5: Melakukan commit dan push hasil preprocessing ke repository
+      - name: Commit and push processed data
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add dataset_preprocessing/*
+          # Commit hanya jika ada perubahan
+          git commit -m "Automated preprocessing of dataset" || echo "No changes to commit"
+          git push
